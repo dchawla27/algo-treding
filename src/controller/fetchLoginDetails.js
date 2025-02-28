@@ -6,6 +6,9 @@ const fetchLoginDetails = async () => {
         const settings = await Settings.find();
         if(settings && settings.length == 1){
             let res = settings[0]
+            if(res.jwtToken == '' || res.feedToken == '' || res.refreshToken == ''){
+                console.error('❌ Error, token is empty. please login:');
+            }
             config.JWT_TOKEN = res.jwtToken;
             config.FEED_TOKEN = res.feedToken
             config.REFRESH_TOKEN = res.refreshToken
