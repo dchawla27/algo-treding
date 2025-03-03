@@ -21,9 +21,10 @@ const startProcess = () => {
     
 };
 
-const stopProcess = () => {
+const stopProcess = async() => {
     clearInterval(interval);
     interval = null;
+    await OrderPlacer.dayCloseCheck()
     stopWebSocket();
 };
 

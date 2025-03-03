@@ -12,7 +12,6 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
         const instrument = selectOption(list, superTrendDirection, increasedLTP);
         console.log(' found the instrument', instrument)
         if(instrument && instrument.tradingsymbol){
-            console.log(' instrument.tradingsymbol', instrument.tradingsymbol)
             try {
                 const orderType = OT.BUY
                 const {exchange, tradingsymbol, symboltoken  } = instrument
@@ -114,7 +113,7 @@ const placeSqareOffOrderToAngel = async(openOrders) => {
           stoploss: "0",
           quantity: ORDER_QTY
         });
-        console.log('orderResponse',orderResponse)
+        console.log('order sqare off ', orderResponse)
     
         if(orderResponse?.data?.uniqueorderid){
             let oID = orderResponse?.data?.uniqueorderid
@@ -148,6 +147,7 @@ const placeSqareOffOrderToAngel = async(openOrders) => {
             
             return false
         }
+        return false
     }
     return false
     

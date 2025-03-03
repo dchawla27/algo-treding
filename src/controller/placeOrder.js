@@ -24,19 +24,19 @@ class OrderPlacer {
         eventBus.on('ltp', (data) => {
             this.ltp = parseInt(data);
             // console.log('Updated LTP:', this.ltp);
-            this.checkConditions();
+            if(!this.isOrderProcessStarted) this.checkConditions();
         });
 
         eventBus.on('superTrendValue', (data) => {
             this.superTrendValue = parseInt(data);
             // console.log('Updated SuperTrend Value:', this.superTrendValue);
-            this.checkConditions();
+            if(!this.isOrderProcessStarted) this.checkConditions();
         });
 
         eventBus.on('superTrendDirection', (data) => {
             this.superTrendDirection = data;
             // console.log('Updated SuperTrend Direction:', this.superTrendDirection);
-            this.checkConditions();
+            if(!this.isOrderProcessStarted) this.checkConditions();
         });
     }
 
@@ -62,42 +62,66 @@ class OrderPlacer {
                 let description = '';
                 if (this.isOrderPlaced) {
                     
-                    const { type, instrumentPrice } = this.isOrderPlaced;
-        
-                    // Square-off order should be opposite type
+                    const { type, instrumentPrice, optiontype } = this.isOrderPlaced;
                     orderType = type === OT.SELL ? OT.BUY : OT.SELL;
         
-                    const now = momentTz().tz(TIMEZONE);
-                    const marketLastMin = now.clone().hour(MARKET_END_HOURS).minute(MARKET_END_MINUTES);
+                    // const now = momentTz().tz(TIMEZONE);
+                    // const marketLastMin = now.clone().hour(MARKET_END_HOURS).minute(MARKET_END_MINUTES);
+
+                    // sup t = 21220
+                    // instrumentPrice = 21200
+                    // ltp 21201
+                    if(optiontype == "CE"){
+                        const diff = instrumentPrice - this.ltp ;
+                        if(this.ltp > instrumentPrice && this.superTrendDirection === "down"){ // profit exit
+                            this.targetPrice = this.ltp;
+                            description = "TREND_DIRECTION_CHANGE";
+                        }else if(diff >= 30){
+                            this.targetPrice = this.ltp;
+                            description = "STOP_LOSS_HIT";
+                        }
+                    }else if(optiontype == "PE"){
+                        const diff = this.ltp - instrumentPrice ;
+                        if(instrumentPrice > this.ltp && this.superTrendDirection === "up"){ // profit exit
+                            this.targetPrice = this.ltp;
+                            description = "TREND_DIRECTION_CHANGE";
+                        }else if(diff >= 30){
+                            this.targetPrice = this.ltp;
+                            description = "STOP_LOSS_HIT";
+                        }
+                    } 
         
-                    if (now.isSame(marketLastMin.clone().subtract(1, "minute"), "minute")) {
-                        this.targetPrice = this.ltp;
-                        description = "DAY_TIME_END";
-                    } else if ((type === OT.SELL && this.superTrendDirection === "up") || (type === OT.BUY && this.superTrendDirection === "down")) {
-                        this.targetPrice = this.ltp;
-                        description = "TREND_DIRECTION_CHANGE";
-                    } else {
-                        if (type === OT.SELL) {
-                            const diff = this.ltp - instrumentPrice;
-                            if (diff >= 30) {
-                                this.targetPrice = this.ltp;
-                                description = "STOP_LOSS_HIT";
-                            }
-                        }
-                        if (type === OT.BUY) {
-                            const diff = instrumentPrice - this.ltp;
-                            if (diff >= 30) {
-                                this.targetPrice = this.ltp;
-                                description = "STOP_LOSS_HIT";
-                            }
-                        }
-                    }
+                    // if (now.isSame(marketLastMin.clone().subtract(1, "minute"), "minute")) {
+                    // if (now.isSame(marketLastMin.clone(), "minute")) {
+                    //     this.targetPrice = this.ltp;
+                    //     description = "DAY_TIME_END";
+                    // }else 
+                    // if( (type === OT.BUY && optiontype == "CE" && this.superTrendDirection === "down" ) || (type === OT.BUY && optiontype == "PE" && this.superTrendDirection === "up" ) ){
+                    //     this.targetPrice = this.ltp;
+                    //     description = "TREND_DIRECTION_CHANGE";
+                    // } else {
+                    // if (type === OT.BUY) {
+                    //     if(optiontype == "CE"){
+                    //         const diff = instrumentPrice - this.ltp;
+                    //         if (diff >= 30) {
+                    //             this.targetPrice = this.ltp;
+                    //             description = "STOP_LOSS_HIT";
+                    //         }
+                    //     }else{
+                    //         const diff = this.ltp - instrumentPrice;
+                    //         if (diff >= 30) {
+                    //             this.targetPrice = this.ltp;
+                    //             description = "STOP_LOSS_HIT";
+                    //         }
+                    //     }
+                       
+                    // }
+                // }
                     
                 } else {
                     // First order placement logic
                     // console.log('First order placement logic. orderPlaced? ', this.isOrderPlaced)
                     this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 20 : this.superTrendValue - 20;
-                    this.isOrderProcessStarted = true;
                 }
         
                 // // **Prevent duplicate orders (Ensures Buy-Sell-Buy-Sell sequence)**
@@ -109,7 +133,6 @@ class OrderPlacer {
                 if (this.targetPrice && this.ltp === this.targetPrice) {
                     try {
                         await this.initiateOrder(this.ltp, this.superTrendDirection, description);
-                        this.isOrderProcessStarted = false;
                         // console.log('order place complete', this.isOrderProcessStarted)
                     } catch (error) {
                         console.log(error)
@@ -182,7 +205,20 @@ class OrderPlacer {
         }
     }    
 
-   
+    async dayCloseCheck(){
+        console.log('checking day close')
+        if(this.isOrderPlaced == null) return;
+
+        this.isOrderProcessStarted = true;
+        try{
+            await this.initiateOrder(this.ltp, this.superTrendDirection, "DAY_TIME_END");
+        }catch(e){
+            console.log('error at DAY_TIME_END square off',e)
+        }finally{
+            this.isOrderProcessStarted = false;
+        }
+        
+   }
 
     
 }
