@@ -6,6 +6,7 @@ const config = require('../dynamicConfig')
 const {searchScrip} = require("./searchScript");
 const { placeFirstOrderToAngel, placeSqareOffOrderToAngel } = require('./placeOrderToAngel');
 const { OT } = require('../common/constants');
+const algotrend = require('../schema/algotrend');
 
 
 
@@ -27,9 +28,12 @@ class OrderPlacer {
             if(!this.isOrderProcessStarted) this.checkConditions();
         });
 
-        eventBus.on('superTrendValue', (data) => {
+        eventBus.on('superTrendValue', async (data) => {
             this.superTrendValue = parseInt(data);
             // console.log('Updated SuperTrend Value:', this.superTrendValue);
+            console.log(this.ltp, this.superTrendDirection, this.superTrendValue)
+            let superTrendDetails = new algotrend({ superTrendValue: this.superTrendValue, superTrendDirection: this.superTrendDirection})
+            await superTrendDetails.save();
             if(!this.isOrderProcessStarted) this.checkConditions();
         });
 
