@@ -66,73 +66,19 @@ class OrderPlacer {
                 let description = '';
                 if (this.isOrderPlaced) {
                     
-                    const { type, instrumentPrice, optiontype } = this.isOrderPlaced;
+                    const { type, optiontype } = this.isOrderPlaced;
                     orderType = type === OT.SELL ? OT.BUY : OT.SELL;
         
-                    // const now = momentTz().tz(TIMEZONE);
-                    // const marketLastMin = now.clone().hour(MARKET_END_HOURS).minute(MARKET_END_MINUTES);
-
-                    // sup t = 21220
-                    // instrumentPrice = 21200
-                    // ltp 21201
-                    if(optiontype == "CE"){
-                        const diff = instrumentPrice - this.ltp ;
-                        if(this.ltp > instrumentPrice && this.superTrendDirection === "down"){ // profit exit
-                            this.targetPrice = this.ltp;
-                            description = "TREND_DIRECTION_CHANGE";
-                        }else if(diff >= 30){
-                            this.targetPrice = this.ltp;
-                            description = "STOP_LOSS_HIT";
-                        }
-                    }else if(optiontype == "PE"){
-                        const diff = this.ltp - instrumentPrice ;
-                        if(instrumentPrice > this.ltp && this.superTrendDirection === "up"){ // profit exit
-                            this.targetPrice = this.ltp;
-                            description = "TREND_DIRECTION_CHANGE";
-                        }else if(diff >= 30){
-                            this.targetPrice = this.ltp;
-                            description = "STOP_LOSS_HIT";
-                        }
+                    if(optiontype == "CE" && this.superTrendDirection === "down"){
+                        this.targetPrice = this.ltp;
+                        description = "TREND_DIRECTION_CHANGE";
+                    }else if(optiontype == "PE" && this.superTrendDirection === "up"){
+                        this.targetPrice = this.ltp;
+                        description = "TREND_DIRECTION_CHANGE";
                     } 
-        
-                    // if (now.isSame(marketLastMin.clone().subtract(1, "minute"), "minute")) {
-                    // if (now.isSame(marketLastMin.clone(), "minute")) {
-                    //     this.targetPrice = this.ltp;
-                    //     description = "DAY_TIME_END";
-                    // }else 
-                    // if( (type === OT.BUY && optiontype == "CE" && this.superTrendDirection === "down" ) || (type === OT.BUY && optiontype == "PE" && this.superTrendDirection === "up" ) ){
-                    //     this.targetPrice = this.ltp;
-                    //     description = "TREND_DIRECTION_CHANGE";
-                    // } else {
-                    // if (type === OT.BUY) {
-                    //     if(optiontype == "CE"){
-                    //         const diff = instrumentPrice - this.ltp;
-                    //         if (diff >= 30) {
-                    //             this.targetPrice = this.ltp;
-                    //             description = "STOP_LOSS_HIT";
-                    //         }
-                    //     }else{
-                    //         const diff = this.ltp - instrumentPrice;
-                    //         if (diff >= 30) {
-                    //             this.targetPrice = this.ltp;
-                    //             description = "STOP_LOSS_HIT";
-                    //         }
-                    //     }
-                       
-                    // }
-                // }
-                    
                 } else {
-                    // First order placement logic
-                    // console.log('First order placement logic. orderPlaced? ', this.isOrderPlaced)
                     this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 20 : this.superTrendValue - 20;
                 }
-        
-                // // **Prevent duplicate orders (Ensures Buy-Sell-Buy-Sell sequence)**
-                // if (this.isOrderPlaced && this.isOrderPlaced.type === orderType) {
-                //     console.log(`Skipping duplicate ${orderType} order`);
-                //     return;
-                // }
         
                 if (this.targetPrice && this.ltp === this.targetPrice) {
                     try {
