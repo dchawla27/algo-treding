@@ -68,13 +68,25 @@ class OrderPlacer {
                     
                     const { type, optiontype } = this.isOrderPlaced;
                     orderType = type === OT.SELL ? OT.BUY : OT.SELL;
-        
-                    if(optiontype == "CE" && this.superTrendDirection === "down"){
-                        this.targetPrice = this.ltp;
-                        description = "TREND_DIRECTION_CHANGE";
-                    }else if(optiontype == "PE" && this.superTrendDirection === "up"){
-                        this.targetPrice = this.ltp;
-                        description = "TREND_DIRECTION_CHANGE";
+                   
+                    if(optiontype == "CE"){
+                        const diff = instrumentPrice - this.ltp ;
+                        if(this.ltp > instrumentPrice && this.superTrendDirection === "down"){ // profit exit
+                            this.targetPrice = this.ltp;
+                            description = "TREND_DIRECTION_CHANGE";
+                        }else if(diff >= 30){
+                            this.targetPrice = this.ltp;
+                            description = "STOP_LOSS_HIT";
+                        }
+                    }else if(optiontype == "PE"){
+                        const diff = this.ltp - instrumentPrice ;
+                        if(instrumentPrice > this.ltp && this.superTrendDirection === "up"){ // profit exit
+                            this.targetPrice = this.ltp;
+                            description = "TREND_DIRECTION_CHANGE";
+                        }else if(diff >= 30){
+                            this.targetPrice = this.ltp;
+                            description = "STOP_LOSS_HIT";
+                        }
                     } 
                 } else {
                     this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 20 : this.superTrendValue - 20;
