@@ -7,6 +7,7 @@ const {searchScrip} = require("./searchScript");
 const { placeFirstOrderToAngel, placeSqareOffOrderToAngel } = require('./placeOrderToAngel');
 const { OT } = require('../common/constants');
 const algotrend = require('../schema/algotrend');
+const Settings = require("../schema/settings")
 
 
 
@@ -66,7 +67,7 @@ class OrderPlacer {
                 let description = '';
                 if (this.isOrderPlaced) {
                     
-                    const { type, optiontype } = this.isOrderPlaced;
+                    const { type, optiontype, instrumentPrice } = this.isOrderPlaced;
                     orderType = type === OT.SELL ? OT.BUY : OT.SELL;
                    
                     if(optiontype == "CE"){
@@ -102,15 +103,29 @@ class OrderPlacer {
                 }
             }
         }catch(e){
-            console.error("Error in checkConditions:", error);
+            console.error("Error in checkConditions:", e);
         }finally {
             this.isOrderProcessStarted = false; // Ensure reset after execution
         }
 
     }
 
+    async isLiveOrderAllowed() {
+        try{
+            const settings = await Settings.find();
+            if(settings && settings.length == 1){
+                return settings[0].isLiveOrdresAllowed
+            }
+            return false;    
+        }catch(e){
+            console.log('error::', e)
+            return false
+        }
+    }
 
     async initiateOrder(ltp, superTrendDirection, description) {
+
+        if(!this.isLiveOrderAllowed()) return false;
         console.log("Initiating order with:", ltp, superTrendDirection, this.superTrendValue);
     
         const session = await Orders.startSession();
@@ -178,6 +193,19 @@ class OrderPlacer {
             console.log('error at DAY_TIME_END square off',e)
         }finally{
             this.isOrderProcessStarted = false;
+        }
+    }
+
+    async disAllowLiveOrder(){
+        try{
+            await Settings.findByIdAndUpdate(
+                "67af382c21b51ebda83c5748",
+                { isLiveOrdresAllowed: false },
+                { new: true }
+            );
+            console.log('Disabled the live orders')
+        }catch(e){
+            console.log('error in disabling the live orders')
         }
         
    }

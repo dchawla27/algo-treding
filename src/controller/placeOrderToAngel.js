@@ -8,7 +8,7 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
     let list  = await searchScrip()
     console.log(' found the list')
     if(list && list.length >0){
-        let increasedLTP = superTrendDirection == "up" ? ltp - 500 : ltp + 500
+        let increasedLTP = superTrendDirection == "up" ? ltp - 400 : ltp + 400
         const instrument = selectOption(list, superTrendDirection, increasedLTP);
         console.log(' found the instrument', instrument)
         if(instrument && instrument.tradingsymbol){

@@ -30,6 +30,7 @@ const stopProcess = async() => {
     clearInterval(interval);
     interval = null;
     await OrderPlacer.dayCloseCheck()
+    await OrderPlacer.disAllowLiveOrder()
     stopWebSocket();
 };
 
