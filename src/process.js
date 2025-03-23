@@ -3,7 +3,6 @@ const { startWebSocket, stopWebSocket } = require("./controller/webSocket");
 const { API_KEY, INTERVAL_MS, TIMEZONE, MARKET_START_HOURS, MARKET_START_MINUTES, MARKET_END_HOURS, MARKET_END_MINUTES } = require("./config");
 const momentTz = require("moment-timezone");
 const OrderPlacer = require('./controller/placeOrder');
-const connectDB = require("./db");
 const fetchLoginDetails = require("./controller/fetchLoginDetails");
 
 
@@ -16,8 +15,6 @@ const isMarketOpen = () => {
 
 const startProcess = async () => {
     if (interval) return;
-
-    await connectDB();
     await fetchLoginDetails();
 
     fetchCandleData();

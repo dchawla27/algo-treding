@@ -1,8 +1,11 @@
+const connectDB = require("./db");
 const { isMarketOpen, startProcess } = require("./process");
 const scheduleJobs = require("./scheduler");
 
 const main = async () => {
     try {
+
+        await connectDB();
         if (isMarketOpen()) {
             startProcess();
         } else {
