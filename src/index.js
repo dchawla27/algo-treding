@@ -5,7 +5,7 @@ const scheduleJobs = require("./scheduler");
 const main = async () => {
     try {
 
-        await connectDB();
+        // await connectDB();
         if (isMarketOpen()) {
             startProcess();
         } else {
