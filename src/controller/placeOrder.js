@@ -94,6 +94,7 @@ class OrderPlacer {
                     this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 25 : this.superTrendValue - 25;
                 }
         
+                this.targetPrice = this.ltp;
                 if (this.targetPrice && this.ltp === this.targetPrice) {
                     try {
                         await this.initiateOrder(this.ltp, this.superTrendDirection, description);
@@ -160,7 +161,8 @@ class OrderPlacer {
             } else {
                 console.log("Placing first order to Angel");
                 let res = await placeFirstOrderToAngel(ltp, superTrendDirection);
-                if (!res) throw new Error("Failed to place first order");
+                console.log('getting error in placing first order')
+                if (!res) return false
     
                 const newOrder = new Orders({
                     ...res,
