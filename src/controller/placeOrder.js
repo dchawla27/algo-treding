@@ -161,7 +161,6 @@ class OrderPlacer {
             } else {
                 console.log("Placing first order to Angel");
                 let res = await placeFirstOrderToAngel(ltp, superTrendDirection);
-                console.log('getting error in placing first order')
                 if (!res) return false
     
                 const newOrder = new Orders({
