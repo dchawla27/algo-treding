@@ -5,6 +5,7 @@ const {  TIMEZONE, MARKET_START_HOURS, MARKET_START_MINUTES, MARKET_END_HOURS, M
 
 const isMarketOpen = () => {
     const now = momentTz().tz(TIMEZONE);
+    console.log(`Current time: ${now.format()}`); 
     return now.isBetween(now.clone().hour(MARKET_START_HOURS).minute(MARKET_START_MINUTES), now.clone().hour(MARKET_END_HOURS).minute(MARKET_END_MINUTES));
 };
 
