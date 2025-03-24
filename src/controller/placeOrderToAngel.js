@@ -4,6 +4,10 @@ const { searchScrip } = require("./searchScript")
 let { SmartAPI, WebSocketClient, WebSocketV2, WSOrderUpdates} = require("../../lib");
 const { OT } = require("../common/constants");
 
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
     let list  = await searchScrip()
     console.log(' found the list')
@@ -36,7 +40,7 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
                   quantity: ORDER_QTY
                 });
                 console.log('order placed ', orderResponse)
-
+                await delay(1000);
                 if(orderResponse?.data?.uniqueorderid){
                     let oID = orderResponse?.data?.uniqueorderid
                     let tradeBook = await smart_api.getOrderBook();

@@ -94,7 +94,7 @@ class OrderPlacer {
                     this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 25 : this.superTrendValue - 25;
                 }
         
-                this.targetPrice = this.ltp;
+                
                 if (this.targetPrice && this.ltp === this.targetPrice) {
                     try {
                         await this.initiateOrder(this.ltp, this.superTrendDirection, description);
