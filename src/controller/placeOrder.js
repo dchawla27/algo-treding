@@ -90,7 +90,7 @@ class OrderPlacer {
                         }
                     } 
                 } else {
-                    this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 20 : this.superTrendValue - 20;
+                    this.targetPrice = this.superTrendDirection === "up" ? this.superTrendValue + 25 : this.superTrendValue - 25;
                 }
         
                 if (this.targetPrice && this.ltp === this.targetPrice) {
