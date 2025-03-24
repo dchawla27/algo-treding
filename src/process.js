@@ -1,7 +1,7 @@
 const { fetchCandleData } = require("./controller/candleData");
 const { startWebSocket, stopWebSocket } = require("./controller/webSocket");
 const {  INTERVAL_MS } = require("./config");
-const OrderPlacer = require('./controller/placeOrder');
+
 const fetchLoginDetails = require("./controller/fetchLoginDetails");
 const connectDB = require("./db");
 
@@ -20,6 +20,7 @@ const startProcess = async () => {
 };
 
 const stopProcess = async() => {
+    const OrderPlacer = require('./controller/placeOrder');
     clearInterval(interval);
     interval = null;
     await OrderPlacer.dayCloseCheck()
