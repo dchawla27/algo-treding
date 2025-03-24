@@ -8,7 +8,7 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
     let list  = await searchScrip()
     console.log(' found the list')
     if(list && list.length >0){
-        let increasedLTP = superTrendDirection == "up" ? ltp - 400 : ltp + 400
+        let increasedLTP = superTrendDirection == "up" ? ltp - 1000 : ltp + 1000
         const instrument = selectOption(list, superTrendDirection, increasedLTP);
         console.log(' found the instrument', instrument)
         if(instrument && instrument.tradingsymbol){
@@ -40,9 +40,12 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
                 if(orderResponse?.data?.uniqueorderid){
                     let oID = orderResponse?.data?.uniqueorderid
                     let tradeBook = await smart_api.getOrderBook();
+                   
                     if(tradeBook && tradeBook?.data && tradeBook.data.length > 0){
+                        console.log('got tradeBook')
                         let placedOrder = tradeBook.data?.filter(x=>x.uniqueorderid == oID && x.orderstatus == "complete")
                         if(placedOrder && placedOrder.length == 1){
+                            console.log('found the order', placedOrder)
                             const {transactiontype, exchtime, tradingsymbol, averageprice, lotsize, exchange, symboltoken, strikeprice, optiontype, expirydate, orderStatus} =  placedOrder[0]
                             return {
                                 success: true,
@@ -65,6 +68,8 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
                                 instrumentPrice: ltp
                               }
                         }
+                    }else{
+                        console.log('failed got tradeBook', tradeBook)
                     }
                    
                     return false

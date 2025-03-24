@@ -19,7 +19,7 @@ const main = async () => {
     }
 };
 
-// main();
+main();
 
 async function tempMain(){
     try{
@@ -32,4 +32,4 @@ async function tempMain(){
     }
 }
 
-tempMain()
+// tempMain()
