@@ -51,6 +51,7 @@ class OrderPlacer {
             if (openOrders.length > 0) {
                this.isOrderPlaced = openOrders[0]
             }
+            console.log('openOrders',openOrders)
         }catch(e){
             console.log('error in fetching open orders:',e)
         }
