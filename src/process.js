@@ -4,6 +4,7 @@ const { API_KEY, INTERVAL_MS, TIMEZONE, MARKET_START_HOURS, MARKET_START_MINUTES
 const momentTz = require("moment-timezone");
 const OrderPlacer = require('./controller/placeOrder');
 const fetchLoginDetails = require("./controller/fetchLoginDetails");
+const connectDB = require("./db");
 
 
 let interval = null;
@@ -15,6 +16,7 @@ const isMarketOpen = () => {
 
 const startProcess = async () => {
     if (interval) return;
+    await connectDB();
     await fetchLoginDetails();
 
     fetchCandleData();
