@@ -1,5 +1,12 @@
-const { isMarketOpen, startProcess } = require("./process");
+const { startProcess } = require("./process");
 const scheduleJobs = require("./scheduler");
+const momentTz = require("moment-timezone");
+const {  TIMEZONE, MARKET_START_HOURS, MARKET_START_MINUTES, MARKET_END_HOURS, MARKET_END_MINUTES } = require("./config");
+
+const isMarketOpen = () => {
+    const now = momentTz().tz(TIMEZONE);
+    return now.isBetween(now.clone().hour(MARKET_START_HOURS).minute(MARKET_START_MINUTES), now.clone().hour(MARKET_END_HOURS).minute(MARKET_END_MINUTES));
+};
 
 
 const main = async () => {
