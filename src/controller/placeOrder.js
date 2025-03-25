@@ -127,7 +127,8 @@ class OrderPlacer {
 
     async initiateOrder(ltp, superTrendDirection, description) {
 
-        if(!this.isLiveOrderAllowed()) return false;
+        const allowed = await this.isLiveOrderAllowed();
+        if(!allowed) return false;
         console.log("Initiating order with:", ltp, superTrendDirection, this.superTrendValue);
     
         const session = await Orders.startSession();
