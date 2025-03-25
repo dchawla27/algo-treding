@@ -123,7 +123,7 @@ const placeSqareOffOrderToAngel = async(openOrders) => {
           quantity: ORDER_QTY
         });
         console.log('order sqare off ', orderResponse)
-    
+        await delay(1000);
         if(orderResponse?.data?.uniqueorderid){
             let oID = orderResponse?.data?.uniqueorderid
             let tradeBook = await smart_api.getOrderBook();

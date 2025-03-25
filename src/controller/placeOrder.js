@@ -139,7 +139,7 @@ class OrderPlacer {
             if (openOrders.length > 0) {
                 console.log("Placing square off order to Angel");
                 let res = await placeSqareOffOrderToAngel(openOrders);
-                if (!res) throw new Error("Failed to place square-off order");
+                if (!res) return false
     
                 await Orders.findByIdAndUpdate(
                     openOrders[0]._id.toString(),
@@ -158,6 +158,7 @@ class OrderPlacer {
                 await newOrder.save({ session });
     
                 this.isOrderPlaced = null;
+                return true
             } else {
                 console.log("Placing first order to Angel");
                 let res = await placeFirstOrderToAngel(ltp, superTrendDirection);
