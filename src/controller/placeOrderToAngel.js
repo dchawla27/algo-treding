@@ -12,7 +12,7 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
     let list  = await searchScrip()
     console.log(' found the list')
     if(list && list.length >0){
-        let increasedLTP = superTrendDirection == "up" ? ltp - 400 : ltp + 400
+        let increasedLTP = superTrendDirection == "up" ? ltp + 1000 : ltp - 1000
         const instrument = selectOption(list, superTrendDirection, increasedLTP);
         console.log(' found the instrument', instrument)
         if(instrument && instrument.tradingsymbol){
@@ -73,7 +73,7 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
                               }
                         }
                     }else{
-                        console.log('failed got tradeBook', tradeBook)
+                        console.error('failed got tradeBook', tradeBook)
                     }
                    
                     return false
@@ -98,65 +98,74 @@ const placeFirstOrderToAngel = async( ltp, superTrendDirection ) => {
 const placeSqareOffOrderToAngel = async(openOrders) => {
 
     if(openOrders && openOrders.length == 1){
-        const {instrument, symboltoken, type, exchange} = openOrders[0];
-        console.log('openOrders',openOrders)
-    
-        const orderType = type == OT.BUY ? OT.SELL : OT.BUY
-        let smart_api = new SmartAPI({
-            api_key: API_KEY,
-            access_token: config.JWT_TOKEN,
-            refresh_token: config.REFRESH_TOKEN,
-        });
-    
-       
-        const orderResponse = await smart_api.placeOrder({
-          variety: "NORMAL",
-          tradingsymbol: instrument,
-          symboltoken: symboltoken,
-          transactiontype: orderType,
-          exchange: exchange,
-          ordertype: "MARKET",
-          producttype: "INTRADAY",
-          duration: "DAY",
-          squareoff: "0",
-          stoploss: "0",
-          quantity: ORDER_QTY
-        });
-        console.log('order sqare off ', orderResponse)
-        await delay(1000);
-        if(orderResponse?.data?.uniqueorderid){
-            let oID = orderResponse?.data?.uniqueorderid
-            let tradeBook = await smart_api.getOrderBook();
-            if(tradeBook && tradeBook?.data && tradeBook.data.length > 0){
-                let placedOrder = tradeBook.data?.filter(x=>x.uniqueorderid == oID && x.orderstatus == "complete")
-                if(placedOrder && placedOrder.length == 1){
-                    const {transactiontype, exchtime, tradingsymbol, averageprice, lotsize, exchange, symboltoken, strikeprice, optiontype, expirydate, orderStatus} =  placedOrder[0]
-                    return {
-                        success: true,
-                        message: orderResponse.message,
-                        orderid: orderResponse.data.orderid,
-                        uniqueorderid: orderResponse.data.uniqueorderid,
-                        type: transactiontype,
-                        date: exchtime, 
-                        instrument: tradingsymbol,
-                        price: averageprice,
-                        qty: lotsize,
-                        exchange, 
-                        symboltoken,
-                        strikeprice,
-                        optiontype,
-                        expirydate,
-                        orderStatus,
-                        description:'',
-                        superTrendValue:'',
-                        instrumentPrice:''
-                      }
+        try{
+            const {instrument, symboltoken, type, exchange} = openOrders[0];
+            console.log('openOrders',openOrders)
+        
+            const orderType = type == OT.BUY ? OT.SELL : OT.BUY
+            let smart_api = new SmartAPI({
+                api_key: API_KEY,
+                access_token: config.JWT_TOKEN,
+                refresh_token: config.REFRESH_TOKEN,
+            });
+        
+           
+            const orderResponse = await smart_api.placeOrder({
+              variety: "NORMAL",
+              tradingsymbol: instrument,
+              symboltoken: symboltoken,
+              transactiontype: orderType,
+              exchange: exchange,
+              ordertype: "MARKET",
+              producttype: "INTRADAY",
+              duration: "DAY",
+              squareoff: "0",
+              stoploss: "0",
+              quantity: ORDER_QTY
+            });
+            console.log('order sqare off ', orderResponse)
+            await delay(1000);
+            console.log('orderResponse',orderResponse)
+            if(orderResponse?.data?.uniqueorderid){
+                let oID = orderResponse?.data?.uniqueorderid
+                let tradeBook = await smart_api.getOrderBook();
+                if(tradeBook && tradeBook?.data && tradeBook.data.length > 0){
+                    let placedOrder = tradeBook.data?.filter(x=>x.uniqueorderid == oID && x.orderstatus == "complete")
+                    if(placedOrder && placedOrder.length == 1){
+                        const {transactiontype, exchtime, tradingsymbol, averageprice, lotsize, exchange, symboltoken, strikeprice, optiontype, expirydate, orderStatus} =  placedOrder[0]
+                        return {
+                            success: true,
+                            message: orderResponse.message,
+                            orderid: orderResponse.data.orderid,
+                            uniqueorderid: orderResponse.data.uniqueorderid,
+                            type: transactiontype,
+                            date: exchtime, 
+                            instrument: tradingsymbol,
+                            price: averageprice,
+                            qty: lotsize,
+                            exchange, 
+                            symboltoken,
+                            strikeprice,
+                            optiontype,
+                            expirydate,
+                            orderStatus,
+                            description:'',
+                            superTrendValue:'',
+                            instrumentPrice:''
+                          }
+                    }else{
+                        console.log('tradeBook found but not the order', tradeBook)
+                    }
+                }else{
+                    console.log('tradeBook response', tradeBook)
                 }
+                
+                return false
             }
-            
             return false
+        }catch(e){
+            console.error('error in squareoff',e)
         }
-        return false
     }
     return false
     

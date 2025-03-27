@@ -10,7 +10,7 @@ let interval = null;
 
 const startProcess = async () => {
     if (interval) return;
-    await connectDB();
+    // await connectDB();
     await fetchLoginDetails();
 
     fetchCandleData();

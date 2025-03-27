@@ -76,6 +76,9 @@ class OrderPlacer {
                         if(this.ltp > instrumentPrice && this.superTrendDirection === "down"){ // profit exit
                             this.targetPrice = this.ltp;
                             description = "TREND_DIRECTION_CHANGE";
+                        }else if(this.ltp > instrumentPrice && this.ltp - instrumentPrice >= 120){
+                            this.targetPrice = this.ltp;
+                            description = "";
                         }else if(diff >= 30){
                             this.targetPrice = this.ltp;
                             description = "STOP_LOSS_HIT";
@@ -85,6 +88,9 @@ class OrderPlacer {
                         if(instrumentPrice > this.ltp && this.superTrendDirection === "up"){ // profit exit
                             this.targetPrice = this.ltp;
                             description = "TREND_DIRECTION_CHANGE";
+                        }else if(instrumentPrice > this.ltp && instrumentPrice - this.ltp >= 120){
+                            this.targetPrice = this.ltp;
+                            description = "";
                         }else if(diff >= 30){
                             this.targetPrice = this.ltp;
                             description = "STOP_LOSS_HIT";
@@ -95,7 +101,7 @@ class OrderPlacer {
                 }
         
                 
-                if (this.targetPrice && this.ltp === this.targetPrice) {
+                if (this.targetPrice !== null && this.ltp === this.targetPrice) {
                     try {
                         await this.initiateOrder(this.ltp, this.superTrendDirection, description);
                         // console.log('order place complete', this.isOrderProcessStarted)
@@ -107,6 +113,7 @@ class OrderPlacer {
         }catch(e){
             console.error("Error in checkConditions:", e);
         }finally {
+            this.targetPrice = null
             this.isOrderProcessStarted = false; // Ensure reset after execution
         }
 
@@ -131,11 +138,11 @@ class OrderPlacer {
         if(!allowed) return false;
         console.log("Initiating order with:", ltp, superTrendDirection, this.superTrendValue);
     
-        const session = await Orders.startSession();
-        session.startTransaction(); // Start transaction
+        // const session = await Orders.startSession();
+        // session.startTransaction(); // Start transaction
     
         try {
-            const openOrders = await Orders.find({ orderStatus: "open" }).session(session);
+            const openOrders = await Orders.find({ orderStatus: "open" });
             
             if (openOrders.length > 0) {
                 console.log("Placing square off order to Angel");
@@ -145,7 +152,7 @@ class OrderPlacer {
                 await Orders.findByIdAndUpdate(
                     openOrders[0]._id.toString(),
                     { orderStatus: "complete" },
-                    { new: true, session }
+                    { new: true }
                 );
     
                 const newOrder = new Orders({
@@ -156,7 +163,7 @@ class OrderPlacer {
                     instrumentPrice: ltp
                 });
     
-                await newOrder.save({ session });
+                await newOrder.save();
     
                 this.isOrderPlaced = null;
                 return true
@@ -171,19 +178,17 @@ class OrderPlacer {
                     superTrendValue: this.superTrendValue
                 });
     
-                await newOrder.save({ session });
+                await newOrder.save();
                 this.isOrderPlaced = newOrder;
             }
     
-            await session.commitTransaction(); // Commit transaction
+            // await session.commitTransaction(); // Commit transaction
             return true;
         } catch (error) {
             console.error("Error in initiateOrder:", error);
-            await session.abortTransaction(); // Rollback transaction on error
+            // await session.abortTransaction(); // Rollback transaction on error
             return false;
-        } finally {
-            session.endSession();
-        }
+        } 
     }    
 
     async dayCloseCheck(){
