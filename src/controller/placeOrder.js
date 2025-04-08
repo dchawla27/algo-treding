@@ -103,7 +103,7 @@ class OrderPlacer {
                 
                 if (this.targetPrice !== null && this.ltp === this.targetPrice) {
                     try {
-                        await this.initiateOrder(this.ltp, this.superTrendDirection, description);
+                        await this.initiateOrder(this.ltp, this.superTrendDirection, description, this.superTrendValue);
                         // console.log('order place complete', this.isOrderProcessStarted)
                     } catch (error) {
                         console.log(error)
@@ -132,11 +132,11 @@ class OrderPlacer {
         }
     }
 
-    async initiateOrder(ltp, superTrendDirection, description) {
+    async initiateOrder(ltp, superTrendDirection, description, superTrendValue) {
 
         const allowed = await this.isLiveOrderAllowed();
         if(!allowed) return false;
-        console.log("Initiating order with:", ltp, superTrendDirection, this.superTrendValue);
+        console.log("Initiating order with:", ltp, superTrendDirection, superTrendValue);
     
         // const session = await Orders.startSession();
         // session.startTransaction(); // Start transaction
@@ -168,18 +168,21 @@ class OrderPlacer {
                 this.isOrderPlaced = null;
                 return true
             } else {
-                console.log("Placing first order to Angel");
-                let res = await placeFirstOrderToAngel(ltp, superTrendDirection);
-                if (!res) return false
-    
-                const newOrder = new Orders({
-                    ...res,
-                    orderStatus: "open",
-                    superTrendValue: this.superTrendValue
-                });
-    
-                await newOrder.save();
-                this.isOrderPlaced = newOrder;
+                let extraCheckPassed = superTrendDirection == 'up' ? ltp -  superTrendValue <= 25 : superTrendValue - ltp <= 25
+                if(extraCheckPassed){
+                    console.log("Placing first order to Angel");
+                    let res = await placeFirstOrderToAngel(ltp, superTrendDirection);
+                    if (!res) return false
+        
+                    const newOrder = new Orders({
+                        ...res,
+                        orderStatus: "open",
+                        superTrendValue: superTrendValue
+                    });
+        
+                    await newOrder.save();
+                    this.isOrderPlaced = newOrder;
+                }
             }
     
             // await session.commitTransaction(); // Commit transaction
@@ -197,7 +200,7 @@ class OrderPlacer {
 
         this.isOrderProcessStarted = true;
         try{
-            await this.initiateOrder(this.ltp, this.superTrendDirection, "DAY_TIME_END");
+            await this.initiateOrder(this.ltp, this.superTrendDirection, "DAY_TIME_END", this.superTrendValue);
         }catch(e){
             console.log('error at DAY_TIME_END square off',e)
         }finally{
