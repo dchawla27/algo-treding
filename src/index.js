@@ -3,6 +3,7 @@ const scheduleJobs = require("./scheduler");
 const momentTz = require("moment-timezone");
 const {  TIMEZONE, MARKET_START_HOURS, MARKET_START_MINUTES, MARKET_END_HOURS, MARKET_END_MINUTES } = require("./config");
 const connectDB = require("./db");
+const fetchLoginDetails = require("./controller/fetchLoginDetails");
 
 
 const isMarketOpen = () => {
@@ -14,6 +15,7 @@ const isMarketOpen = () => {
 const main = async () => {
     try {
         await connectDB();
+        await fetchLoginDetails();
         if (isMarketOpen()) {
             startProcess();
         } else {

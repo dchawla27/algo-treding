@@ -12,5 +12,7 @@ module.exports = {
   MARKET_END_HOURS: process.env.MARKET_END_HOURS,
   MARKET_END_MINUTES: process.env.MARKET_END_MINUTES,
   SEARCH_SCRIPT: process.env.SEARCH_SCRIPT,
-  ORDER_QTY:  process.env.ORDER_QTY
+  ORDER_QTY:  process.env.ORDER_QTY,
+  REFRESH_TOKEN_HOUR: process.env.REFRESH_TOKEN_HOUR,
+  REFRESH_TOKEN_MIN: process.env.REFRESH_TOKEN_MIN
 };
