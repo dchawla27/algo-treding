@@ -10,15 +10,18 @@ const refreshToken = async () => {
         refresh_token: dynamicConfig.REFRESH_TOKEN
     });
 
-    const newToket = await smart_api.generateToken(dynamicConfig.REFRESH_TOKEN)
-    await Settings.findByIdAndUpdate(
-        "67af382c21b51ebda83c5748",
-        { jwtToken: newToket.data.jwtToken, refreshToken: newToket.data.refreshToken, feedToken: newToket.data.feedToken },
-        { new: true }
-    );
-    dynamicConfig.JWT_TOKEN = newToket.data.jwtToken;
-    dynamicConfig.FEED_TOKEN = newToket.data.feedToken;
-    dynamicConfig.REFRESH_TOKEN = newToket.data.refreshToken;
+    try{
+        const newToket = await smart_api.generateToken(dynamicConfig.REFRESH_TOKEN)
+        await Settings.findByIdAndUpdate(
+            "67af382c21b51ebda83c5748",
+            { jwtToken: newToket.data.jwtToken, refreshToken: newToket.data.refreshToken, feedToken: newToket.data.feedToken },
+            { new: true }
+        );
+        console.log('Token updated successfuly.')
+    }catch(e){
+        console.log('Error in updating Token.')
+    }
+    
 };
 
 module.exports = { refreshToken };
