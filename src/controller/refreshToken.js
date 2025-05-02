@@ -19,7 +19,7 @@ const refreshToken = async () => {
         );
         console.log('Token updated successfuly.')
     }catch(e){
-        console.log('Error in updating Token.')
+        console.log('Error in updating Token.',e)
     }
     
 };
