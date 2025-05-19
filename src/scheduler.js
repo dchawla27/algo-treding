@@ -6,7 +6,7 @@ const {refreshToken} = require('./controller/refreshToken')
 const scheduleJobs = () => {
     schedule.scheduleJob({ hour: MARKET_START_HOURS, minute: MARKET_START_MINUTES, tz: TIMEZONE }, startProcess);
     schedule.scheduleJob({ hour: MARKET_END_HOURS, minute: MARKET_END_MINUTES, tz: TIMEZONE }, stopProcess);
-    schedule.scheduleJob({ hour: REFRESH_TOKEN_HOUR, minute: REFRESH_TOKEN_MIN, tz: TIMEZONE }, refreshToken);
+    // schedule.scheduleJob({ hour: REFRESH_TOKEN_HOUR, minute: REFRESH_TOKEN_MIN, tz: TIMEZONE }, refreshToken);
 };
 
 module.exports = scheduleJobs;
